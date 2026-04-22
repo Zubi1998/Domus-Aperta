@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="gold17" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#9A7817"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Abgerundete quadratische Form (wie App-Icon) -->
+  <rect width="400" height="400" rx="80" fill="#0F0F0F"/>
+
+  <!-- Dünner Rahmen -->
+  <rect x="25" y="25" width="350" height="350" rx="60" fill="none" stroke="url(#gold17)" stroke-width="1"/>
+
+  <!-- Zentrales Icon, grösser weil es alleine ist -->
+  <g transform="translate(200, 210)">
+    <!-- Torbogen -->
+    <path d="M -85,90 L -85,-25 A 85,85 0 0 1 85,-25 L 85,90"
+          stroke="url(#gold17)" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+    <!-- Schlüssel -->
+    <g>
+      <circle cx="0" cy="-25" r="16" fill="none" stroke="url(#gold17)" stroke-width="3"/>
+      <rect x="-1.8" y="-10" width="3.6" height="80" fill="url(#gold17)"/>
+      <rect x="-1.8" y="62" width="14" height="3.6" fill="url(#gold17)"/>
+      <rect x="-1.8" y="70" width="10" height="3.6" fill="url(#gold17)"/>
+    </g>
+
+    <!-- Bodenlinie -->
+    <line x1="-110" y1="90" x2="110" y2="90" stroke="url(#gold17)" stroke-width="2.5"/>
+  </g>
+
+  <!-- Kleines DA Monogramm unten als Extra -->
+  <text x="200" y="355" text-anchor="middle"
+        font-family="Georgia, serif" font-size="14" font-weight="400"
+        fill="url(#gold17)" letter-spacing="8">DOMVS APERTA</text>
+</svg>
