@@ -50,7 +50,7 @@ STUFEN = {
     "Platin": {
         "min": 90, "max": 105,
         "titel": "Grossmeister der Gastlichkeit",
-        "motto": "Unerreichte Vollkommenheit",
+        "motto": "Barmherziger Samariter",
         "farbe": "#E5E4E2",
     },
 }
@@ -231,7 +231,8 @@ def generate_certificate(
 
     # -------------------------------------------------------------------
     # Unterer Bereich: feste Positionen vom unteren Rand
-    # Reihenfolge von unten: MMXXVI (55) -> Motto (75) -> GRAND MAITRE (108) -> Signatur-Linie (120) -> Datum (150)
+    # Reihenfolge von unten: MMXXVI (35) -> Motto (55) -> Label (88) -> Name (100)
+    #                        Signatur-Linie (115) -> Datum (150)
     # -------------------------------------------------------------------
 
     # Datum
@@ -240,25 +241,39 @@ def generate_certificate(
     c.setFont("Times-Italic", 10)
     c.drawCentredString(W / 2, 150, f"Verliehen am  {d_text}")
 
-    # Signatur-Linie
+    # Drei Signaturen: Gruendungsmitglieder nebeneinander
+    gruender = [
+        "Jérôme Zurbuchen",
+        "Manuel Krattiger",
+        "Livia Zahnd",
+    ]
+    # Zentren der drei Signatur-Blocks: links / mitte / rechts
+    sig_centers = [W / 2 - 170, W / 2, W / 2 + 170]
+    sig_half = 65  # halbe Linienlaenge
+
     c.setStrokeColor(text_gedaempft)
     c.setLineWidth(0.4)
-    c.line(W / 2 - 80, 120, W / 2 + 80, 120)
-
-    # GRAND MAITRE Label
-    c.setFillColor(text_gedaempft)
-    c.setFont("Helvetica", 8)
-    c.drawCentredString(W / 2, 108, "GRAND MAITRE")
+    for cx, name_g in zip(sig_centers, gruender):
+        # Signatur-Linie
+        c.line(cx - sig_half, 115, cx + sig_half, 115)
+        # Name des Gruendungsmitglieds
+        c.setFillColor(text_hell)
+        c.setFont("Times-Roman", 9)
+        c.drawCentredString(cx, 103, name_g)
+        # Label
+        c.setFillColor(text_gedaempft)
+        c.setFont("Helvetica", 7)
+        c.drawCentredString(cx, 91, "GRÜNDUNGSMITGLIED")
 
     # Motto am Fuss
     c.setFillColor(farbe)
     c.setFont("Times-Italic", 10)
-    c.drawCentredString(W / 2, 75, "*  HOSPITALITAS  .  HONOR  .  GAUDIUM  *")
+    c.drawCentredString(W / 2, 55, "*  HOSPITALITAS  .  HONOR  .  GAUDIUM  *")
 
-    # Jahr
+    # Jahr (aktuelles Jahr in Zahlen)
     c.setFillColor(text_gedaempft)
     c.setFont("Helvetica", 8)
-    c.drawCentredString(W / 2, 55, "MMXXVI")
+    c.drawCentredString(W / 2, 38, str(date.today().year))
 
     c.save()
 
@@ -305,7 +320,7 @@ def generate_all_examples() -> None:
             punkte=daten["punkte"],
             stufe=stufe,
             output=str(OUTPUT_DIR / f"Zertifikat_{stufe}_Beispiel.pdf"),
-            datum="15. Martius MMXXVI",
+            datum="15. Maerz 2026",
             kategorien=daten["kategorien"],
         )
         # Leervorlage
@@ -314,7 +329,7 @@ def generate_all_examples() -> None:
             punkte=0,
             stufe=stufe,
             output=str(OUTPUT_DIR / f"Zertifikat_{stufe}_Vorlage.pdf"),
-            datum="__. _____________ MMXXVI",
+            datum="__. _____________ 2026",
         )
         print(f"Erzeugt: {stufe} (Beispiel + Vorlage)")
 
