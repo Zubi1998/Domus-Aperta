@@ -200,22 +200,23 @@ def checks_raw() -> pd.DataFrame:
     ]
     if backend_name() == "supabase":
         client = _supabase_client()
-        # Join via Supabase-Foreign-Key-Syntax
-        resp = (
+        # Zwei separate Queries und Join in Python:
+        # robuster als PostgREST-Embedding (umgeht PGRST125).
+        checks_resp = (
             client.table("checks")
-            .select("id, datum, bewerter, empfang, essen, aufmerksamkeit, wow, bonus, kommentar, gastgeber_id, gastgeber(name)")
+            .select("id, datum, bewerter, empfang, essen, aufmerksamkeit, wow, bonus, kommentar, gastgeber_id")
             .order("datum", desc=True)
             .order("id", desc=True)
             .execute()
         )
-        rows = resp.data or []
-        # gastgeber ist ein verschachteltes dict -> flachklopfen
-        for r in rows:
-            gg = r.pop("gastgeber", None) or {}
-            r["gastgeber"] = gg.get("name") if isinstance(gg, dict) else str(gg)
-        df = pd.DataFrame(rows)
-        if df.empty:
+        rows = checks_resp.data or []
+        if not rows:
             return pd.DataFrame(columns=cols)
+        gg_resp = client.table("gastgeber").select("id, name").execute()
+        gg_map = {g["id"]: g["name"] for g in (gg_resp.data or [])}
+        for r in rows:
+            r["gastgeber"] = gg_map.get(r.get("gastgeber_id"), "?")
+        df = pd.DataFrame(rows)
         return df[cols]
     else:
         query = """
