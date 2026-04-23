@@ -51,7 +51,7 @@ STUFEN = {
         "min": 90, "max": 105,
         "titel": "Grossmeister der Gastlichkeit",
         "motto": "Barmherziger Samariter",
-        "farbe": "#E5E4E2",
+        "farbe": "#6B2E83",
     },
 }
 
