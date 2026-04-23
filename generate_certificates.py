@@ -51,7 +51,7 @@ STUFEN = {
         "min": 90, "max": 105,
         "titel": "Grossmeister der Gastlichkeit",
         "motto": "Barmherziger Samariter",
-        "farbe": "#6B2E83",
+        "farbe": "#C9C4D5",
     },
 }
 
@@ -105,6 +105,12 @@ def generate_certificate(
     c.setLineWidth(1.2)
     margin = 30
     c.rect(margin, margin, W - 2 * margin, H - 2 * margin, stroke=1, fill=0)
+
+    # Platin: zusaetzlicher doppelter Aussenrahmen zur Differenzierung
+    if stufe == "Platin":
+        c.setLineWidth(0.6)
+        dbl = margin + 4
+        c.rect(dbl, dbl, W - 2 * dbl, H - 2 * dbl, stroke=1, fill=0)
 
     # Innerer duenner Rahmen
     c.setLineWidth(0.4)
@@ -164,6 +170,16 @@ def generate_certificate(
     c.setFont("Times-Bold", 44)
     stufe_y = zert_y - 56
     c.drawCentredString(W / 2, stufe_y, stufe.upper())
+
+    # Platin: Zierliche Sterne links und rechts vom Titel
+    if stufe == "Platin":
+        stufe_text = stufe.upper()
+        text_halbbreite = c.stringWidth(stufe_text, "Times-Bold", 44) / 2
+        stern_abstand = 30  # Abstand vom Textrand
+        c.setFont("Times-Roman", 22)
+        c.setFillColor(farbe)
+        c.drawCentredString(W / 2 - text_halbbreite - stern_abstand, stufe_y + 4, "\u2726")  # BLACK FOUR POINTED STAR
+        c.drawCentredString(W / 2 + text_halbbreite + stern_abstand, stufe_y + 4, "\u2726")
 
     # Untertitel der Stufe
     c.setFillColor(text_hell)
