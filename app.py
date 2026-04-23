@@ -293,15 +293,13 @@ def tab_rangliste() -> None:
     st.dataframe(anzeige, use_container_width=True)
 
 
-def _datum_latein(d: date) -> str:
-    """Formatiert ein Datum im edlen Stil, z.B. '15. Martius MMXXVI'."""
+def _datum_deutsch(d: date) -> str:
+    """Formatiert ein Datum auf Deutsch, z.B. '15. Maerz 2026'."""
     monate = [
-        "Januarius", "Februarius", "Martius", "Aprilis", "Maius", "Junius",
-        "Julius", "Augustus", "September", "October", "November", "December",
+        "Januar", "Februar", "Maerz", "April", "Mai", "Juni",
+        "Juli", "August", "September", "Oktober", "November", "Dezember",
     ]
-    roemisch = {2026: "MMXXVI", 2027: "MMXXVII", 2028: "MMXXVIII", 2029: "MMXXIX", 2030: "MMXXX"}
-    jahr = roemisch.get(d.year, str(d.year))
-    return f"{d.day}. {monate[d.month - 1]} {jahr}"
+    return f"{d.day}. {monate[d.month - 1]} {d.year}"
 
 
 def _zertifikat_download_block(gastgeber_name: str, punkte: float, stufe_name: str,
@@ -320,7 +318,7 @@ def _zertifikat_download_block(gastgeber_name: str, punkte: float, stufe_name: s
             name=gastgeber_name,
             punkte=punkte,
             stufe=stufe_name,
-            datum=_datum_latein(datum),
+            datum=_datum_deutsch(datum),
             kategorien=kategorien,
         )
         safe_name = "".join(c for c in gastgeber_name if c.isalnum() or c in " _-").strip().replace(" ", "_")

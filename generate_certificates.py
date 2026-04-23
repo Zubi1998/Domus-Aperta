@@ -231,15 +231,15 @@ def generate_certificate(
 
     # -------------------------------------------------------------------
     # Unterer Bereich: feste Positionen vom unteren Rand
-    # Reihenfolge von unten: MMXXVI (35) -> Motto (55) -> Label (88) -> Name (100)
-    #                        Signatur-Linie (115) -> Datum (150)
+    # Reihenfolge von unten: Motto (55) -> Label (88) -> Name (100)
+    #                        Signatur-Linie (115) -> Datum (200)
     # -------------------------------------------------------------------
 
-    # Datum
+    # Datum (deutlich ueber den Signaturen, damit Luft zum Unterschreiben bleibt)
     d_text = datum or date.today().strftime("%d. %B %Y")
     c.setFillColor(text_gedaempft)
     c.setFont("Times-Italic", 10)
-    c.drawCentredString(W / 2, 150, f"Verliehen am  {d_text}")
+    c.drawCentredString(W / 2, 200, f"Verliehen am  {d_text}")
 
     # Drei Signaturen: Gruendungsmitglieder nebeneinander
     gruender = [
@@ -269,11 +269,6 @@ def generate_certificate(
     c.setFillColor(farbe)
     c.setFont("Times-Italic", 10)
     c.drawCentredString(W / 2, 55, "*  HOSPITALITAS  .  HONOR  .  GAUDIUM  *")
-
-    # Jahr (aktuelles Jahr in Zahlen)
-    c.setFillColor(text_gedaempft)
-    c.setFont("Helvetica", 8)
-    c.drawCentredString(W / 2, 38, str(date.today().year))
 
     c.save()
 
