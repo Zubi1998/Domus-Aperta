@@ -267,11 +267,32 @@ def generate_certificate(
     sig_centers = [W / 2 - 170, W / 2, W / 2 + 170]
     sig_half = 65  # halbe Linienlaenge
 
+    # Helles Unterschriftsfeld hinter jeder Linie
+    # (damit normale Tinte auf dem dunklen Zertifikat sichtbar bleibt)
+    sig_feld_farbe = HexColor("#F5F1E8")  # creme / elfenbein
+    sig_feld_breite = sig_half * 2 + 20   # etwas breiter als die Linie
+    sig_feld_hoehe = 38                   # Platz zum Unterschreiben
+    sig_feld_y = 115                      # Unterkante auf Hoehe der Linie
+    for cx in sig_centers:
+        c.setFillColor(sig_feld_farbe)
+        c.setStrokeColor(farbe)
+        c.setLineWidth(0.4)
+        c.roundRect(
+            cx - sig_feld_breite / 2,
+            sig_feld_y,
+            sig_feld_breite,
+            sig_feld_hoehe,
+            3,  # Eckenradius
+            stroke=1,
+            fill=1,
+        )
+
+    # Signatur-Linien, Namen und Labels
     c.setStrokeColor(text_gedaempft)
     c.setLineWidth(0.4)
     for cx, name_g in zip(sig_centers, gruender):
-        # Signatur-Linie
-        c.line(cx - sig_half, 115, cx + sig_half, 115)
+        # Signatur-Linie (am unteren Rand des Felds)
+        c.line(cx - sig_half, sig_feld_y, cx + sig_half, sig_feld_y)
         # Name des Gruendungsmitglieds
         c.setFillColor(text_hell)
         c.setFont("Times-Roman", 9)
