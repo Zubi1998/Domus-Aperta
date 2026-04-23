@@ -17,8 +17,10 @@ import io
 from datetime import date
 from pathlib import Path
 
+import qrcode
 from reportlab.lib.colors import HexColor
 from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPDF
@@ -26,6 +28,9 @@ from reportlab.graphics import renderPDF
 HERE = Path(__file__).parent
 LOGO_PDF_SVG = HERE / "logo_pdf.svg"
 OUTPUT_DIR = HERE / "zertifikate"
+
+# Standard-URL fuer den QR-Code (kann pro Aufruf ueberschrieben werden)
+DEFAULT_APP_URL = "https://domus-aperta.streamlit.app/"
 
 # Stufendefinitionen
 STUFEN = {
@@ -65,6 +70,22 @@ def _recolored_logo_drawing(farbe_hex: str):
     return drawing
 
 
+def _qr_image(data: str) -> io.BytesIO:
+    """Erzeugt einen QR-Code und gibt ihn als PNG-Buffer zurueck (fuer reportlab)."""
+    qr = qrcode.QRCode(
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=10,
+        border=2,
+    )
+    qr.add_data(data)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return buf
+
+
 def generate_certificate(
     name: str,
     punkte: float,
@@ -72,6 +93,8 @@ def generate_certificate(
     output,
     datum: str | None = None,
     kategorien: dict | None = None,
+    app_url: str | None = None,
+    gast_passwort: str | None = None,
 ) -> None:
     """
     Erzeugt ein Zertifikat-PDF.
@@ -255,7 +278,39 @@ def generate_certificate(
     d_text = datum or date.today().strftime("%d. %B %Y")
     c.setFillColor(text_gedaempft)
     c.setFont("Times-Italic", 10)
-    c.drawCentredString(W / 2, 200, f"Verliehen am  {d_text}")
+    c.drawCentredString(W / 2, 240, f"Verliehen am  {d_text}")
+
+    # -------------------------------------------------------------------
+    # QR-Code + Passwort rechts (Gaeste scannen und sehen die Rangliste)
+    # -------------------------------------------------------------------
+    url_fuer_qr = app_url or DEFAULT_APP_URL
+    if url_fuer_qr:
+        qr_size = 55
+        qr_x = W - inner - qr_size - 10
+        qr_y = 170
+        try:
+            qr_img = _qr_image(url_fuer_qr)
+            # Heller Hintergrund fuer bessere Scan-Lesbarkeit
+            c.setFillColor(HexColor("#FFFFFF"))
+            c.rect(qr_x - 3, qr_y - 3, qr_size + 6, qr_size + 6, stroke=0, fill=1)
+            c.drawImage(ImageReader(qr_img), qr_x, qr_y, qr_size, qr_size)
+
+            # Label oberhalb des QR-Codes
+            c.setFillColor(text_gedaempft)
+            c.setFont("Times-Roman", 7)
+            c.drawCentredString(qr_x + qr_size / 2, qr_y + qr_size + 6, "RANGLISTE SCANNEN")
+
+            # Passwort unterhalb des QR-Codes (nur wenn uebergeben)
+            if gast_passwort:
+                c.setFillColor(text_hell)
+                c.setFont("Times-Roman", 8)
+                c.drawCentredString(
+                    qr_x + qr_size / 2,
+                    qr_y - 10,
+                    f"Passwort:  {gast_passwort}",
+                )
+        except Exception as e:
+            print(f"Warnung: QR-Code konnte nicht eingefuegt werden ({e})")
 
     # Drei Signaturen: Gruendungsmitglieder nebeneinander
     gruender = [
@@ -316,10 +371,18 @@ def generate_certificate_bytes(
     stufe: str,
     datum: str | None = None,
     kategorien: dict | None = None,
+    app_url: str | None = None,
+    gast_passwort: str | None = None,
 ) -> bytes:
     """Wie generate_certificate(), liefert das PDF aber als bytes zurueck (fuer st.download_button)."""
     buf = io.BytesIO()
-    generate_certificate(name, punkte, stufe, buf, datum=datum, kategorien=kategorien)
+    generate_certificate(
+        name, punkte, stufe, buf,
+        datum=datum,
+        kategorien=kategorien,
+        app_url=app_url,
+        gast_passwort=gast_passwort,
+    )
     return buf.getvalue()
 
 

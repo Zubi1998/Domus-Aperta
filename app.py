@@ -313,6 +313,13 @@ def _zertifikat_download_block(gastgeber_name: str, punkte: float, stufe_name: s
         )
         return
 
+    # URL + Gast-Passwort fuer den QR-Code auf dem Zertifikat
+    try:
+        app_url = st.secrets.get("APP_URL", "https://domus-aperta.streamlit.app/")
+    except Exception:
+        app_url = "https://domus-aperta.streamlit.app/"
+    gast_passwort = get_passwords()["gast"]
+
     try:
         pdf_bytes = generate_certificate_bytes(
             name=gastgeber_name,
@@ -320,6 +327,8 @@ def _zertifikat_download_block(gastgeber_name: str, punkte: float, stufe_name: s
             stufe=stufe_name,
             datum=_datum_deutsch(datum),
             kategorien=kategorien,
+            app_url=app_url,
+            gast_passwort=gast_passwort,
         )
         safe_name = "".join(c for c in gastgeber_name if c.isalnum() or c in " _-").strip().replace(" ", "_")
         filename = f"Zertifikat_{stufe_name}_{safe_name or 'Gastgeber'}.pdf"
