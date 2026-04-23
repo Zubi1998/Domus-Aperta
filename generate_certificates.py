@@ -177,7 +177,7 @@ def generate_certificate(
 
     # "AN"
     c.setFillColor(text_gedaempft)
-    c.setFont("Helvetica", 9)
+    c.setFont("Times-Roman", 9)
     an_y = stufe_y - 85
     c.drawCentredString(W / 2, an_y, "AN")
 
@@ -194,7 +194,7 @@ def generate_certificate(
 
     # "MIT DER GESAMTPUNKTZAHL"
     c.setFillColor(text_gedaempft)
-    c.setFont("Helvetica", 9)
+    c.setFont("Times-Roman", 9)
     punkte_label_y = name_y - 40
     c.drawCentredString(W / 2, punkte_label_y, "MIT DER GESAMTPUNKTZAHL")
 
@@ -223,7 +223,7 @@ def generate_certificate(
         for i, (label, value) in enumerate(spalten):
             cx = start_x + i * col_w + col_w / 2
             c.setFillColor(text_gedaempft)
-            c.setFont("Helvetica", 6.5)
+            c.setFont("Times-Roman", 7)
             c.drawCentredString(cx, cat_label_y, label)
             c.setFillColor(text_hell)
             c.setFont("Times-Roman", 13)
@@ -262,7 +262,7 @@ def generate_certificate(
         c.drawCentredString(cx, 103, name_g)
         # Label
         c.setFillColor(text_gedaempft)
-        c.setFont("Helvetica", 7)
+        c.setFont("Times-Roman", 7)
         c.drawCentredString(cx, 91, "GRÜNDUNGSMITGLIED")
 
     # Motto am Fuss
