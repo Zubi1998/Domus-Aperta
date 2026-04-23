@@ -281,34 +281,30 @@ def generate_certificate(
     c.drawCentredString(W / 2, 240, f"Verliehen am  {d_text}")
 
     # -------------------------------------------------------------------
-    # QR-Code + Passwort rechts (Gaeste scannen und sehen die Rangliste)
+    # QR-Code + Passwort zentriert (Gaeste scannen und sehen die Rangliste)
     # -------------------------------------------------------------------
     url_fuer_qr = app_url or DEFAULT_APP_URL
     if url_fuer_qr:
-        qr_size = 55
-        qr_x = W - inner - qr_size - 10
-        qr_y = 170
+        qr_size = 40
+        qr_x = (W - qr_size) / 2
+        qr_y = 180
         try:
             qr_img = _qr_image(url_fuer_qr)
-            # Heller Hintergrund fuer bessere Scan-Lesbarkeit
+            # Weisser Hintergrund mit abgerundeten Ecken
             c.setFillColor(HexColor("#FFFFFF"))
-            c.rect(qr_x - 3, qr_y - 3, qr_size + 6, qr_size + 6, stroke=0, fill=1)
+            c.roundRect(
+                qr_x - 4, qr_y - 4,
+                qr_size + 8, qr_size + 8,
+                5,  # Eckenradius
+                stroke=0, fill=1,
+            )
             c.drawImage(ImageReader(qr_img), qr_x, qr_y, qr_size, qr_size)
 
-            # Label oberhalb des QR-Codes
-            c.setFillColor(text_gedaempft)
-            c.setFont("Times-Roman", 7)
-            c.drawCentredString(qr_x + qr_size / 2, qr_y + qr_size + 6, "RANGLISTE SCANNEN")
-
-            # Passwort unterhalb des QR-Codes (nur wenn uebergeben)
+            # Passwort unterhalb des QR-Codes (zentriert)
             if gast_passwort:
                 c.setFillColor(text_hell)
                 c.setFont("Times-Roman", 8)
-                c.drawCentredString(
-                    qr_x + qr_size / 2,
-                    qr_y - 10,
-                    f"Passwort:  {gast_passwort}",
-                )
+                c.drawCentredString(W / 2, qr_y - 12, f"Passwort:  {gast_passwort}")
         except Exception as e:
             print(f"Warnung: QR-Code konnte nicht eingefuegt werden ({e})")
 
