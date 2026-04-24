@@ -210,6 +210,123 @@ def inject_css() -> None:
             margin-top: 2rem;
             opacity: 0.8;
         }
+        /* --- Startseite (Vereins-Manifest) --- */
+        .domus-startseite {
+            max-width: 760px;
+            margin: 0 auto 2rem auto;
+            line-height: 1.7;
+        }
+        .ds-subtitle {
+            text-align: center;
+            color: #A0A0A0;
+            font-style: italic;
+            letter-spacing: 3px;
+            font-size: 0.95rem;
+            margin-top: -0.6rem;
+            margin-bottom: 1.5rem;
+        }
+        .ds-prolog {
+            text-align: center;
+            font-size: 1.05rem;
+            color: #DDDDDD;
+            font-style: italic;
+            margin: 1.8rem 0 2.4rem 0;
+        }
+        .domus-startseite h3 {
+            text-align: center;
+            letter-spacing: 5px;
+            margin-top: 2.4rem;
+            margin-bottom: 1.2rem;
+            font-size: 1.1rem;
+        }
+        .ds-werte {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+        .ds-wert {
+            flex: 1 1 200px;
+            background-color: var(--card);
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 1rem 1.2rem;
+            text-align: center;
+        }
+        .ds-wert-name {
+            color: var(--gold);
+            letter-spacing: 4px;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .ds-wert-text {
+            color: #CCCCCC;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+        .ds-liste {
+            margin: 0.8rem auto;
+            max-width: 560px;
+        }
+        .ds-liste li {
+            margin: 0.4rem 0;
+            color: #DDDDDD;
+        }
+        .ds-liste li b {
+            color: var(--gold);
+            letter-spacing: 2px;
+        }
+        .ds-stufen {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-width: 560px;
+            margin: 1rem auto;
+        }
+        .ds-stufe {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.7rem 1rem;
+            border-left: 3px solid;
+            background-color: rgba(255,255,255,0.02);
+        }
+        .ds-stufe-name {
+            min-width: 80px;
+            letter-spacing: 4px;
+            font-weight: bold;
+        }
+        .ds-stufe-punkte {
+            color: #888;
+            font-size: 0.85rem;
+            min-width: 80px;
+        }
+        .ds-stufe-titel {
+            color: #DDDDDD;
+            font-style: italic;
+            flex: 1;
+        }
+        .ds-stufe.bronze  { border-left-color: #8B5A2B; }
+        .ds-stufe.silber  { border-left-color: #A8A8A8; }
+        .ds-stufe.gold    { border-left-color: #D4AF37; }
+        .ds-stufe.platin  { border-left-color: #C9C4D5; }
+        .ds-stufe.bronze  .ds-stufe-name { color: #B07840; }
+        .ds-stufe.silber  .ds-stufe-name { color: #A8A8A8; }
+        .ds-stufe.gold    .ds-stufe-name { color: #D4AF37; }
+        .ds-stufe.platin  .ds-stufe-name { color: #C9C4D5; }
+        .ds-gruender {
+            text-align: center;
+            color: var(--gold);
+            letter-spacing: 3px;
+            font-size: 1rem;
+            margin: 0.6rem 0 2rem 0;
+        }
+        .ds-trenner {
+            border: none;
+            border-top: 1px solid #333;
+            margin: 2rem 0;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -243,9 +360,98 @@ def footer() -> None:
     )
 
 
+def startseite() -> None:
+    """Vereins-Manifest als Landing Page (vor dem Login sichtbar)."""
+    st.markdown(
+        """
+<div class="domus-startseite">
+
+<div class="ds-subtitle">Haus der offenen T&uuml;re &middot; Bund der Gastlichkeit</div>
+
+<p class="ds-prolog">
+Domus Aperta ist ein Verein unter Freunden, gegr&uuml;ndet aus der &Uuml;berzeugung, dass wahre Gastfreundschaft keine Selbstverst&auml;ndlichkeit ist &ndash; sondern eine Kunst, die gepflegt werden will. Wer jemanden einl&auml;dt, &ouml;ffnet nicht nur seine T&uuml;re, sondern seinen Tisch, sein Haus und ein St&uuml;ck seiner selbst. Diese Geste verdient W&uuml;rdigung.
+</p>
+
+<h3>Unsere drei Werte</h3>
+
+<div class="ds-werte">
+    <div class="ds-wert">
+        <div class="ds-wert-name">HOSPITALITAS</div>
+        <div class="ds-wert-text">Gastfreundschaft als Haltung. Nicht Perfektion, sondern Herzlichkeit.</div>
+    </div>
+    <div class="ds-wert">
+        <div class="ds-wert-name">HONOR</div>
+        <div class="ds-wert-text">Ehre im Geben und im Bewerten. Ein Check ist stets wohlwollend.</div>
+    </div>
+    <div class="ds-wert">
+        <div class="ds-wert-name">GAUDIUM</div>
+        <div class="ds-wert-text">Freude. Am gemeinsamen Tisch, am Kochen, am Beisammensein.</div>
+    </div>
+</div>
+
+<h3>Wie ein Check abl&auml;uft</h3>
+
+<p style="text-align:center; max-width:620px; margin:0 auto 1rem auto; color:#DDDDDD;">
+Wenn ein Mitglied als Gastgeber:in einl&auml;dt, bewerten die anwesenden Gr&uuml;ndungsmitglieder den Abend in f&uuml;nf Dimensionen:
+</p>
+
+<ul class="ds-liste">
+    <li><b>Empfang</b> &middot; 20&nbsp;% &ndash; Ankunft, Begr&uuml;ssung, Atmosph&auml;re</li>
+    <li><b>Essen</b> &middot; 30&nbsp;% &ndash; Qualit&auml;t, Kreativit&auml;t, Ausf&uuml;hrung</li>
+    <li><b>Aufmerksamkeit</b> &middot; 25&nbsp;% &ndash; F&uuml;rsorge, Getr&auml;nke, Details</li>
+    <li><b>Wow-Faktor</b> &middot; 25&nbsp;% &ndash; das Besondere, das Unerwartete</li>
+    <li><b>Bonus</b> &middot; 0&ndash;5 &ndash; f&uuml;r ausserordentliche Momente</li>
+</ul>
+
+<p style="text-align:center; max-width:620px; margin:1rem auto 0 auto; color:#AAAAAA; font-style:italic; font-size:0.95rem;">
+Die Summe ergibt 0 bis 105 Punkte und f&uuml;hrt zu einer der vier Rangstufen des Bundes.
+</p>
+
+<h3>Die vier Stufen der Gastlichkeit</h3>
+
+<div class="ds-stufen">
+    <div class="ds-stufe bronze">
+        <div class="ds-stufe-name">BRONZE</div>
+        <div class="ds-stufe-punkte">40&ndash;59</div>
+        <div class="ds-stufe-titel">Aspirant der Gastlichkeit &mdash; &bdquo;Erste Schritte im Bund&ldquo;</div>
+    </div>
+    <div class="ds-stufe silber">
+        <div class="ds-stufe-name">SILBER</div>
+        <div class="ds-stufe-punkte">60&ndash;74</div>
+        <div class="ds-stufe-titel">Gesandter der Gastlichkeit &mdash; &bdquo;Ehrenvoll im Empfang&ldquo;</div>
+    </div>
+    <div class="ds-stufe gold">
+        <div class="ds-stufe-name">GOLD</div>
+        <div class="ds-stufe-punkte">75&ndash;89</div>
+        <div class="ds-stufe-titel">Meister der Gastlichkeit &mdash; &bdquo;Vorz&uuml;glich in Allem&ldquo;</div>
+    </div>
+    <div class="ds-stufe platin">
+        <div class="ds-stufe-name">PLATIN</div>
+        <div class="ds-stufe-punkte">90&ndash;105</div>
+        <div class="ds-stufe-titel">Grossmeister der Gastlichkeit &mdash; &bdquo;Barmherziger Samariter&ldquo;</div>
+    </div>
+</div>
+
+<p style="text-align:center; max-width:620px; margin:1.4rem auto 0 auto; color:#AAAAAA; font-style:italic; font-size:0.95rem;">
+Wer eine Stufe erreicht, erh&auml;lt ein pers&ouml;nliches Zertifikat mit Unterschrift aller drei Gr&uuml;ndungsmitglieder.
+</p>
+
+<h3>Die Gr&uuml;ndungsmitglieder</h3>
+
+<div class="ds-gruender">J&eacute;r&ocirc;me Zurbuchen &middot; Manuel Krattiger &middot; Livia Zahnd</div>
+
+<hr class="ds-trenner"/>
+
+</div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def login_view() -> bool:
     inject_css()
     header()
+    startseite()
     st.markdown("#### Zutritt")
     pwd = st.text_input("Passwort", type="password", label_visibility="collapsed", placeholder="Passwort")
     col1, _ = st.columns([1, 3])
