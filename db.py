@@ -191,6 +191,85 @@ def check_hinzufuegen(daten: dict) -> None:
             )
 
 
+def check_aktualisieren(check_id: int, daten: dict) -> None:
+    """Aktualisiert einen bestehenden Check. Felder wie bei check_hinzufuegen
+    (ohne gastgeber_id - der Gastgeber bleibt unveraendert)."""
+    payload: dict[str, Any] = {
+        "datum": daten["datum"],
+        "bewerter": daten["bewerter"],
+        "empfang": int(daten["empfang"]),
+        "essen": int(daten["essen"]),
+        "aufmerksamkeit": int(daten["aufmerksamkeit"]),
+        "wow": int(daten["wow"]),
+        "bonus": int(daten["bonus"]),
+        "kommentar": daten.get("kommentar", "") or "",
+    }
+    if backend_name() == "supabase":
+        client = _supabase_client()
+        client.table("checks").update(payload).eq("id", int(check_id)).execute()
+    else:
+        with _sqlite_conn() as conn:
+            conn.execute(
+                """
+                UPDATE checks
+                   SET datum = ?, bewerter = ?, empfang = ?, essen = ?,
+                       aufmerksamkeit = ?, wow = ?, bonus = ?, kommentar = ?
+                 WHERE id = ?
+                """,
+                (
+                    payload["datum"],
+                    payload["bewerter"],
+                    payload["empfang"],
+                    payload["essen"],
+                    payload["aufmerksamkeit"],
+                    payload["wow"],
+                    payload["bonus"],
+                    payload["kommentar"],
+                    int(check_id),
+                ),
+            )
+
+
+def check_loeschen(check_id: int) -> None:
+    """Loescht einen Check anhand seiner ID."""
+    if backend_name() == "supabase":
+        client = _supabase_client()
+        client.table("checks").delete().eq("id", int(check_id)).execute()
+    else:
+        with _sqlite_conn() as conn:
+            conn.execute("DELETE FROM checks WHERE id = ?", (int(check_id),))
+
+
+def gastgeber_loeschen(gastgeber_id: int) -> None:
+    """Loescht einen Gastgeber. Wirft ValueError, wenn noch Checks dafuer existieren."""
+    if backend_name() == "supabase":
+        client = _supabase_client()
+        resp = (
+            client.table("checks")
+            .select("id")
+            .eq("gastgeber_id", int(gastgeber_id))
+            .limit(1)
+            .execute()
+        )
+        if resp.data:
+            raise ValueError(
+                "Dieser Gastgeber hat noch Checks. Bitte zuerst die Checks loeschen."
+            )
+        client.table("gastgeber").delete().eq("id", int(gastgeber_id)).execute()
+    else:
+        with _sqlite_conn() as conn:
+            cur = conn.execute(
+                "SELECT COUNT(*) FROM checks WHERE gastgeber_id = ?",
+                (int(gastgeber_id),),
+            )
+            anzahl = cur.fetchone()[0]
+            if anzahl > 0:
+                raise ValueError(
+                    f"Dieser Gastgeber hat noch {anzahl} Check(s). Bitte zuerst die Checks loeschen."
+                )
+            conn.execute("DELETE FROM gastgeber WHERE id = ?", (int(gastgeber_id),))
+
+
 def checks_raw() -> pd.DataFrame:
     """Alle Checks inkl. Gastgebername, sortiert nach Datum absteigend.
     Ohne berechnete Punktzahl (die erledigt app.py)."""

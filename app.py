@@ -107,6 +107,18 @@ def check_hinzufuegen(daten: dict) -> None:
     db.check_hinzufuegen(daten)
 
 
+def check_aktualisieren(check_id: int, daten: dict) -> None:
+    db.check_aktualisieren(check_id, daten)
+
+
+def check_loeschen(check_id: int) -> None:
+    db.check_loeschen(check_id)
+
+
+def gastgeber_loeschen(gastgeber_id: int) -> None:
+    db.gastgeber_loeschen(gastgeber_id)
+
+
 def checks_mit_punkten() -> pd.DataFrame:
     df = db.checks_raw()
     if df.empty:
@@ -335,6 +347,7 @@ def inject_css() -> None:
 
 def header() -> None:
     logo_b64 = load_logo_base64()
+    jahr = date.today().year
     if logo_b64:
         st.markdown(
             f"""
@@ -342,7 +355,7 @@ def header() -> None:
                 <img src="data:image/svg+xml;base64,{logo_b64}" width="120"/>
                 <h1 style="letter-spacing: 12px; margin-top: 0.6rem; margin-bottom: 0;">DOMVS APERTA</h1>
                 <div style="color:#888; letter-spacing: 6px; font-size: 0.75rem;">
-                    HOSPITALITY CHECK &middot; MMXXVI
+                    HOSPITALITY CHECK &middot; {jahr}
                 </div>
             </div>
             <hr style="border:none; border-top: 1px solid #333; margin: 1.5rem 0;"/>
@@ -671,13 +684,54 @@ def tab_gastgeber() -> None:
     gg = gastgeber_liste()
     if gg.empty:
         st.info("Noch keine Gastgeber.")
-    else:
-        st.dataframe(
-            gg.rename(columns={"name": "Name", "beschreibung": "Beschreibung", "erstellt": "Erstellt"})[
-                ["Name", "Beschreibung", "Erstellt"]
-            ],
-            use_container_width=True,
-        )
+        return
+
+    st.dataframe(
+        gg.rename(columns={"name": "Name", "beschreibung": "Beschreibung", "erstellt": "Erstellt"})[
+            ["Name", "Beschreibung", "Erstellt"]
+        ],
+        use_container_width=True,
+    )
+
+    # Loeschen (nur Admin / Grand Maitre)
+    st.markdown("#### Gastgeber loeschen")
+    st.caption(
+        "Ein Gastgeber kann nur geloescht werden, wenn keine Checks mehr fuer ihn existieren."
+    )
+    for _, g_row in gg.iterrows():
+        gg_id = int(g_row["id"])
+        gg_name = g_row["name"]
+        col_name, col_btn = st.columns([4, 1])
+        with col_name:
+            st.markdown(
+                f"<div style='padding-top:0.5rem; color:#DDD;'>{gg_name}</div>",
+                unsafe_allow_html=True,
+            )
+        with col_btn:
+            bestaetigt = st.session_state.get(f"gg_del_confirm_{gg_id}", False)
+            if not bestaetigt:
+                if st.button("Loeschen", key=f"gg_del_{gg_id}"):
+                    st.session_state[f"gg_del_confirm_{gg_id}"] = True
+                    st.rerun()
+            else:
+                col_ok, col_cancel = st.columns(2)
+                with col_ok:
+                    if st.button("Ja", key=f"gg_del_ok_{gg_id}"):
+                        try:
+                            gastgeber_loeschen(gg_id)
+                            st.session_state.pop(f"gg_del_confirm_{gg_id}", None)
+                            st.success(f"Gastgeber '{gg_name}' geloescht.")
+                            st.rerun()
+                        except ValueError as exc:
+                            st.session_state.pop(f"gg_del_confirm_{gg_id}", None)
+                            st.error(str(exc))
+                        except Exception as exc:
+                            st.session_state.pop(f"gg_del_confirm_{gg_id}", None)
+                            st.error(f"Fehler beim Loeschen: {exc}")
+                with col_cancel:
+                    if st.button("Nein", key=f"gg_del_cancel_{gg_id}"):
+                        st.session_state.pop(f"gg_del_confirm_{gg_id}", None)
+                        st.rerun()
 
 
 def tab_historie(is_admin: bool = False) -> None:
@@ -745,6 +799,110 @@ def tab_historie(is_admin: bool = False) -> None:
                     },
                     key_suffix=f"hist_{row.id}",
                 )
+
+        # Bearbeiten / Loeschen (nur Admin / Grand Maitre)
+        if is_admin:
+            with st.expander(f"Bearbeiten / Loeschen ({row.gastgeber}, {row.datum})"):
+                with st.form(f"edit_form_{row.id}", clear_on_submit=False):
+                    col_d, col_b = st.columns(2)
+                    with col_d:
+                        neu_datum = st.date_input(
+                            "Datum",
+                            value=date.fromisoformat(row.datum),
+                            key=f"edit_datum_{row.id}",
+                        )
+                    with col_b:
+                        neu_bewerter = st.text_input(
+                            "Bewerter",
+                            value=row.bewerter,
+                            key=f"edit_bewerter_{row.id}",
+                        )
+                    neu_kommentar = st.text_area(
+                        "Kommentar",
+                        value=row.kommentar or "",
+                        height=80,
+                        key=f"edit_kommentar_{row.id}",
+                    )
+                    st.markdown("##### Bewertung")
+                    e1, e2, e3, e4 = st.columns(4)
+                    with e1:
+                        neu_empfang = st.slider(
+                            "Empfang (20%)", 1, 10, int(row.empfang),
+                            key=f"edit_empfang_{row.id}",
+                        )
+                    with e2:
+                        neu_essen = st.slider(
+                            "Essen (30%)", 1, 10, int(row.essen),
+                            key=f"edit_essen_{row.id}",
+                        )
+                    with e3:
+                        neu_aufmerksamkeit = st.slider(
+                            "Aufmerksamkeit (25%)", 1, 10, int(row.aufmerksamkeit),
+                            key=f"edit_aufmerksamkeit_{row.id}",
+                        )
+                    with e4:
+                        neu_wow = st.slider(
+                            "Wow (25%)", 1, 10, int(row.wow),
+                            key=f"edit_wow_{row.id}",
+                        )
+                    neu_bonus = st.slider(
+                        "Bonus / Malus", -5, 5, int(row.bonus),
+                        key=f"edit_bonus_{row.id}",
+                    )
+
+                    col_save, col_del = st.columns(2)
+                    with col_save:
+                        speichern = st.form_submit_button("AENDERUNGEN SPEICHERN")
+                    with col_del:
+                        loeschen = st.form_submit_button("CHECK LOESCHEN")
+
+                    if speichern:
+                        if not neu_bewerter.strip():
+                            st.error("Bitte Bewerter eintragen.")
+                        else:
+                            try:
+                                check_aktualisieren(
+                                    int(row.id),
+                                    {
+                                        "datum": neu_datum.isoformat(),
+                                        "bewerter": neu_bewerter.strip(),
+                                        "empfang": neu_empfang,
+                                        "essen": neu_essen,
+                                        "aufmerksamkeit": neu_aufmerksamkeit,
+                                        "wow": neu_wow,
+                                        "bonus": neu_bonus,
+                                        "kommentar": neu_kommentar.strip(),
+                                    },
+                                )
+                                st.success("Check aktualisiert.")
+                                st.rerun()
+                            except Exception as exc:
+                                st.error(f"Fehler beim Aktualisieren: {exc}")
+
+                    if loeschen:
+                        st.session_state[f"hist_del_confirm_{row.id}"] = True
+
+                # Bestaetigungs-Block (ausserhalb des Forms, damit der Rerun funktioniert)
+                if st.session_state.get(f"hist_del_confirm_{row.id}"):
+                    st.warning(
+                        f"Diesen Check wirklich loeschen? "
+                        f"{row.gastgeber} &middot; {row.datum} &middot; {row.gesamt} Punkte"
+                    )
+                    col_ok, col_cancel = st.columns(2)
+                    with col_ok:
+                        if st.button("Ja, endgueltig loeschen", key=f"hist_del_ok_{row.id}"):
+                            try:
+                                check_loeschen(int(row.id))
+                                st.session_state.pop(f"hist_del_confirm_{row.id}", None)
+                                st.success("Check geloescht.")
+                                st.rerun()
+                            except Exception as exc:
+                                st.session_state.pop(f"hist_del_confirm_{row.id}", None)
+                                st.error(f"Fehler beim Loeschen: {exc}")
+                    with col_cancel:
+                        if st.button("Abbrechen", key=f"hist_del_cancel_{row.id}"):
+                            st.session_state.pop(f"hist_del_confirm_{row.id}", None)
+                            st.rerun()
 
 
 # ---------------------------------------------------------------------------
