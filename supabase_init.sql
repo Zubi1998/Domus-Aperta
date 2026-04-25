@@ -68,3 +68,11 @@ create policy "checks_insert" on public.checks
 drop policy if exists "checks_update" on public.checks;
 create policy "checks_update" on public.checks
     for update to anon, authenticated using (true) with check (true);
+
+drop policy if exists "gastgeber_delete" on public.gastgeber;
+create policy "gastgeber_delete" on public.gastgeber
+    for delete to anon, authenticated using (true);
+
+drop policy if exists "checks_delete" on public.checks;
+create policy "checks_delete" on public.checks
+    for delete to anon, authenticated using (true);

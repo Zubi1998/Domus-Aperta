@@ -502,12 +502,12 @@ def tab_rangliste() -> None:
         columns={
             "gastgeber": "Gastgeber",
             "anzahl_checks": "Checks",
-            "durchschnitt": "&Oslash; Punkte",
+            "durchschnitt": "Ø Punkte",
             "bestes": "Bestwert",
             "letzter_check": "Letzter Check",
             "aktuelle_stufe": "Stufe",
         }
-    )[["Gastgeber", "Checks", "&Oslash; Punkte", "Bestwert", "Letzter Check", "Stufe"]]
+    )[["Gastgeber", "Checks", "Ø Punkte", "Bestwert", "Letzter Check", "Stufe"]]
     anzeige.index = anzeige.index + 1
     st.dataframe(anzeige, use_container_width=True)
 
