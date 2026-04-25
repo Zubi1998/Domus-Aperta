@@ -696,42 +696,35 @@ def tab_gastgeber() -> None:
     # Löschen (nur Admin / Grand Maître)
     st.markdown("#### Gastgeber löschen")
     st.caption(
-        "Ein Gastgeber kann nur gelöscht werden, wenn keine Checks mehr für ihn existieren."
+        "Ein Gastgeber kann nur gelöscht werden, wenn keine Checks mehr für ihn existieren. "
+        "Setze das Häkchen, um den Button freizuschalten."
     )
     for _, g_row in gg.iterrows():
         gg_id = int(g_row["id"])
         gg_name = g_row["name"]
-        col_name, col_btn = st.columns([4, 1])
+        col_name, col_check, col_btn = st.columns([3, 2, 1])
         with col_name:
             st.markdown(
                 f"<div style='padding-top:0.5rem; color:#DDD;'>{gg_name}</div>",
                 unsafe_allow_html=True,
             )
+        with col_check:
+            bestaetigt = st.checkbox(
+                "Wirklich löschen", key=f"gg_del_check_{gg_id}"
+            )
         with col_btn:
-            bestaetigt = st.session_state.get(f"gg_del_confirm_{gg_id}", False)
-            if not bestaetigt:
-                if st.button("Löschen", key=f"gg_del_{gg_id}"):
-                    st.session_state[f"gg_del_confirm_{gg_id}"] = True
+            if st.button(
+                "Löschen", key=f"gg_del_btn_{gg_id}", disabled=not bestaetigt
+            ):
+                try:
+                    gastgeber_loeschen(gg_id)
+                    st.session_state.pop(f"gg_del_check_{gg_id}", None)
+                    st.success(f"Gastgeber '{gg_name}' gelöscht.")
                     st.rerun()
-            else:
-                col_ok, col_cancel = st.columns(2)
-                with col_ok:
-                    if st.button("Ja", key=f"gg_del_ok_{gg_id}"):
-                        try:
-                            gastgeber_loeschen(gg_id)
-                            st.session_state.pop(f"gg_del_confirm_{gg_id}", None)
-                            st.success(f"Gastgeber '{gg_name}' gelöscht.")
-                            st.rerun()
-                        except ValueError as exc:
-                            st.session_state.pop(f"gg_del_confirm_{gg_id}", None)
-                            st.error(str(exc))
-                        except Exception as exc:
-                            st.session_state.pop(f"gg_del_confirm_{gg_id}", None)
-                            st.error(f"Fehler beim Löschen: {exc}")
-                with col_cancel:
-                    if st.button("Nein", key=f"gg_del_cancel_{gg_id}"):
-                        st.session_state.pop(f"gg_del_confirm_{gg_id}", None)
-                        st.rerun()
+                except ValueError as exc:
+                    st.error(str(exc))
+                except Exception as exc:
+                    st.error(f"Fehler beim Löschen: {exc}")
 
 
 def tab_historie(is_admin: bool = False) -> None:
@@ -802,12 +795,7 @@ def tab_historie(is_admin: bool = False) -> None:
 
         # Bearbeiten / Löschen (nur Admin / Grand Maître)
         if is_admin:
-            confirm_key = f"hist_del_confirm_{row.id}"
-            expander_offen = bool(st.session_state.get(confirm_key))
-            with st.expander(
-                f"Bearbeiten / Löschen ({row.gastgeber}, {row.datum})",
-                expanded=expander_offen,
-            ):
+            with st.expander(f"Bearbeiten / Löschen ({row.gastgeber}, {row.datum})"):
                 with st.form(f"edit_form_{row.id}", clear_on_submit=False):
                     col_d, col_b = st.columns(2)
                     with col_d:
@@ -880,31 +868,27 @@ def tab_historie(is_admin: bool = False) -> None:
                             except Exception as exc:
                                 st.error(f"Fehler beim Aktualisieren: {exc}")
 
-                # Löschen außerhalb des Forms (sonst schluckt das Form den Klick)
-                if not st.session_state.get(confirm_key):
-                    if st.button("CHECK LÖSCHEN", key=f"hist_del_btn_{row.id}"):
-                        st.session_state[confirm_key] = True
+                # Löschen: Häkchen setzen → Button wird klickbar → direkt löschen
+                st.markdown("---")
+                st.markdown("**Check löschen**")
+                bestaetigt = st.checkbox(
+                    "Ja, ich möchte diesen Check unwiderruflich löschen.",
+                    key=f"hist_del_check_{row.id}",
+                )
+                if st.button(
+                    "CHECK ENDGÜLTIG LÖSCHEN",
+                    key=f"hist_del_btn_{row.id}",
+                    disabled=not bestaetigt,
+                ):
+                    try:
+                        check_loeschen(int(row.id))
+                        st.session_state.pop(f"hist_del_check_{row.id}", None)
+                        st.success(
+                            f"Check gelöscht: {row.gastgeber} · {row.datum} · {row.gesamt} Punkte"
+                        )
                         st.rerun()
-                else:
-                    st.warning(
-                        f"Diesen Check wirklich löschen? "
-                        f"{row.gastgeber} · {row.datum} · {row.gesamt} Punkte"
-                    )
-                    col_ok, col_cancel = st.columns(2)
-                    with col_ok:
-                        if st.button("Ja, endgültig löschen", key=f"hist_del_ok_{row.id}"):
-                            try:
-                                check_loeschen(int(row.id))
-                                st.session_state.pop(confirm_key, None)
-                                st.success("Check gelöscht.")
-                                st.rerun()
-                            except Exception as exc:
-                                st.session_state.pop(confirm_key, None)
-                                st.error(f"Fehler beim Löschen: {exc}")
-                    with col_cancel:
-                        if st.button("Abbrechen", key=f"hist_del_cancel_{row.id}"):
-                            st.session_state.pop(confirm_key, None)
-                            st.rerun()
+                    except Exception as exc:
+                        st.error(f"Fehler beim Löschen: {exc}")
 
 
 # ---------------------------------------------------------------------------

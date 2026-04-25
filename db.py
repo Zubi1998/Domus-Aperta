@@ -231,43 +231,63 @@ def check_aktualisieren(check_id: int, daten: dict) -> None:
 
 
 def check_loeschen(check_id: int) -> None:
-    """Loescht einen Check anhand seiner ID."""
+    """Loescht einen Check anhand seiner ID.
+    Wirft RuntimeError, wenn die Loeschung stillschweigend fehlschlaegt
+    (z.B. wegen Supabase Row Level Security)."""
+    cid = int(check_id)
     if backend_name() == "supabase":
         client = _supabase_client()
-        client.table("checks").delete().eq("id", int(check_id)).execute()
+        resp = client.table("checks").delete().eq("id", cid).execute()
+        if not resp.data:
+            raise RuntimeError(
+                "Check wurde nicht gelöscht. Möglicherweise verhindert eine "
+                "Supabase Row-Level-Security-Policy den DELETE-Vorgang. "
+                "Prüfe in Supabase unter Authentication > Policies, ob für "
+                "die Tabelle 'checks' eine DELETE-Policy existiert."
+            )
     else:
         with _sqlite_conn() as conn:
-            conn.execute("DELETE FROM checks WHERE id = ?", (int(check_id),))
+            cur = conn.execute("DELETE FROM checks WHERE id = ?", (cid,))
+            if cur.rowcount == 0:
+                raise RuntimeError(f"Kein Check mit ID {cid} gefunden.")
 
 
 def gastgeber_loeschen(gastgeber_id: int) -> None:
     """Loescht einen Gastgeber. Wirft ValueError, wenn noch Checks dafuer existieren."""
+    gid = int(gastgeber_id)
     if backend_name() == "supabase":
         client = _supabase_client()
         resp = (
             client.table("checks")
             .select("id")
-            .eq("gastgeber_id", int(gastgeber_id))
+            .eq("gastgeber_id", gid)
             .limit(1)
             .execute()
         )
         if resp.data:
             raise ValueError(
-                "Dieser Gastgeber hat noch Checks. Bitte zuerst die Checks loeschen."
+                "Dieser Gastgeber hat noch Checks. Bitte zuerst die Checks löschen."
             )
-        client.table("gastgeber").delete().eq("id", int(gastgeber_id)).execute()
+        del_resp = client.table("gastgeber").delete().eq("id", gid).execute()
+        if not del_resp.data:
+            raise RuntimeError(
+                "Gastgeber wurde nicht gelöscht. Möglicherweise verhindert eine "
+                "Supabase Row-Level-Security-Policy den DELETE-Vorgang."
+            )
     else:
         with _sqlite_conn() as conn:
             cur = conn.execute(
                 "SELECT COUNT(*) FROM checks WHERE gastgeber_id = ?",
-                (int(gastgeber_id),),
+                (gid,),
             )
             anzahl = cur.fetchone()[0]
             if anzahl > 0:
                 raise ValueError(
-                    f"Dieser Gastgeber hat noch {anzahl} Check(s). Bitte zuerst die Checks loeschen."
+                    f"Dieser Gastgeber hat noch {anzahl} Check(s). Bitte zuerst die Checks löschen."
                 )
-            conn.execute("DELETE FROM gastgeber WHERE id = ?", (int(gastgeber_id),))
+            cur = conn.execute("DELETE FROM gastgeber WHERE id = ?", (gid,))
+            if cur.rowcount == 0:
+                raise RuntimeError(f"Kein Gastgeber mit ID {gid} gefunden.")
 
 
 def checks_raw() -> pd.DataFrame:
