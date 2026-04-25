@@ -27,8 +27,8 @@ GEWICHTE = {
 }
 
 STUFEN = [
-    (90, 105, "Platin",  "Grossmeister der Gastlichkeit", "Unerreichte Vollkommenheit", "#E5E4E2"),
-    (75, 89,  "Gold",    "Meister der Gastlichkeit",      "Vorzueglich in Allem",        "#D4AF37"),
+    (90, 105, "Platin",  "Großmeister der Gastlichkeit", "Unerreichte Vollkommenheit", "#E5E4E2"),
+    (75, 89,  "Gold",    "Meister der Gastlichkeit",      "Vorzüglich in Allem",         "#D4AF37"),
     (60, 74,  "Silber",  "Gesandter der Gastlichkeit",    "Ehrenvoll im Empfang",        "#A8A8A8"),
     (40, 59,  "Bronze",  "Aspirant der Gastlichkeit",     "Erste Schritte im Bund",      "#8B5A2B"),
 ]
@@ -479,7 +479,7 @@ def login_view() -> bool:
     st.markdown(
         '<div style="color:#666; font-size:0.8rem; margin-top:1rem; letter-spacing:2px;">'
         'Mitglieder-Passwort: Rangliste &amp; Historie &nbsp;&nbsp;|&nbsp;&nbsp; '
-        'Grand-Ma&icirc;tre-Passwort: Vollzugriff'
+        'Grand-Maître-Passwort: Vollzugriff'
         '</div>',
         unsafe_allow_html=True,
     )
@@ -513,9 +513,9 @@ def tab_rangliste() -> None:
 
 
 def _datum_deutsch(d: date) -> str:
-    """Formatiert ein Datum auf Deutsch, z.B. '15. Maerz 2026'."""
+    """Formatiert ein Datum auf Deutsch, z.B. '15. März 2026'."""
     monate = [
-        "Januar", "Februar", "Maerz", "April", "Mai", "Juni",
+        "Januar", "Februar", "März", "April", "Mai", "Juni",
         "Juli", "August", "September", "Oktober", "November", "Dezember",
     ]
     return f"{d.day}. {monate[d.month - 1]} {d.year}"
@@ -528,7 +528,7 @@ def _zertifikat_download_block(gastgeber_name: str, punkte: float, stufe_name: s
     if punkte < 40:
         st.info(
             f"Die Punktzahl {punkte} liegt unter der Bronze-Schwelle (40). "
-            "Fuer diesen Check wird kein Zertifikat ausgestellt."
+            "Für diesen Check wird kein Zertifikat ausgestellt."
         )
         return
 
@@ -582,9 +582,9 @@ def tab_check_eintragen() -> None:
         st.markdown("#### Bewertung (1-10 pro Kategorie)")
         c1, c2, c3, c4 = st.columns(4)
         with c1:
-            empfang = st.slider("Empfang & Begruessung (20%)", 1, 10, 7)
+            empfang = st.slider("Empfang & Begrüßung (20%)", 1, 10, 7)
         with c2:
-            essen = st.slider("Essen & Getraenke (30%)", 1, 10, 7)
+            essen = st.slider("Essen & Getränke (30%)", 1, 10, 7)
         with c3:
             aufmerksamkeit = st.slider("Aufmerksamkeit (25%)", 1, 10, 7)
         with c4:
@@ -668,13 +668,13 @@ def tab_gastgeber() -> None:
     with st.form("gg_form", clear_on_submit=True):
         name = st.text_input("Name")
         beschreibung = st.text_area("Beschreibung", height=80)
-        if st.form_submit_button("HINZUFUEGEN"):
+        if st.form_submit_button("HINZUFÜGEN"):
             if not name.strip():
                 st.error("Name darf nicht leer sein.")
             else:
                 try:
                     gastgeber_hinzufuegen(name, beschreibung)
-                    st.success(f"Gastgeber '{name}' hinzugefuegt.")
+                    st.success(f"Gastgeber '{name}' hinzugefügt.")
                 except ValueError as exc:
                     st.error(str(exc))
                 except Exception as exc:
@@ -693,10 +693,10 @@ def tab_gastgeber() -> None:
         use_container_width=True,
     )
 
-    # Loeschen (nur Admin / Grand Maitre)
-    st.markdown("#### Gastgeber loeschen")
+    # Löschen (nur Admin / Grand Maître)
+    st.markdown("#### Gastgeber löschen")
     st.caption(
-        "Ein Gastgeber kann nur geloescht werden, wenn keine Checks mehr fuer ihn existieren."
+        "Ein Gastgeber kann nur gelöscht werden, wenn keine Checks mehr für ihn existieren."
     )
     for _, g_row in gg.iterrows():
         gg_id = int(g_row["id"])
@@ -710,7 +710,7 @@ def tab_gastgeber() -> None:
         with col_btn:
             bestaetigt = st.session_state.get(f"gg_del_confirm_{gg_id}", False)
             if not bestaetigt:
-                if st.button("Loeschen", key=f"gg_del_{gg_id}"):
+                if st.button("Löschen", key=f"gg_del_{gg_id}"):
                     st.session_state[f"gg_del_confirm_{gg_id}"] = True
                     st.rerun()
             else:
@@ -720,14 +720,14 @@ def tab_gastgeber() -> None:
                         try:
                             gastgeber_loeschen(gg_id)
                             st.session_state.pop(f"gg_del_confirm_{gg_id}", None)
-                            st.success(f"Gastgeber '{gg_name}' geloescht.")
+                            st.success(f"Gastgeber '{gg_name}' gelöscht.")
                             st.rerun()
                         except ValueError as exc:
                             st.session_state.pop(f"gg_del_confirm_{gg_id}", None)
                             st.error(str(exc))
                         except Exception as exc:
                             st.session_state.pop(f"gg_del_confirm_{gg_id}", None)
-                            st.error(f"Fehler beim Loeschen: {exc}")
+                            st.error(f"Fehler beim Löschen: {exc}")
                 with col_cancel:
                     if st.button("Nein", key=f"gg_del_cancel_{gg_id}"):
                         st.session_state.pop(f"gg_del_confirm_{gg_id}", None)
@@ -782,9 +782,9 @@ def tab_historie(is_admin: bool = False) -> None:
             unsafe_allow_html=True,
         )
 
-        # Zertifikats-Download (nur fuer Admin)
+        # Zertifikats-Download (nur für Admin)
         if is_admin and row.gesamt >= 40:
-            with st.expander(f"Zertifikat fuer {row.gastgeber} ({stufe['name']}) erstellen"):
+            with st.expander(f"Zertifikat für {row.gastgeber} ({stufe['name']}) erstellen"):
                 _zertifikat_download_block(
                     gastgeber_name=row.gastgeber,
                     punkte=float(row.gesamt),
@@ -800,9 +800,14 @@ def tab_historie(is_admin: bool = False) -> None:
                     key_suffix=f"hist_{row.id}",
                 )
 
-        # Bearbeiten / Loeschen (nur Admin / Grand Maitre)
+        # Bearbeiten / Löschen (nur Admin / Grand Maître)
         if is_admin:
-            with st.expander(f"Bearbeiten / Loeschen ({row.gastgeber}, {row.datum})"):
+            confirm_key = f"hist_del_confirm_{row.id}"
+            expander_offen = bool(st.session_state.get(confirm_key))
+            with st.expander(
+                f"Bearbeiten / Löschen ({row.gastgeber}, {row.datum})",
+                expanded=expander_offen,
+            ):
                 with st.form(f"edit_form_{row.id}", clear_on_submit=False):
                     col_d, col_b = st.columns(2)
                     with col_d:
@@ -850,11 +855,7 @@ def tab_historie(is_admin: bool = False) -> None:
                         key=f"edit_bonus_{row.id}",
                     )
 
-                    col_save, col_del = st.columns(2)
-                    with col_save:
-                        speichern = st.form_submit_button("AENDERUNGEN SPEICHERN")
-                    with col_del:
-                        loeschen = st.form_submit_button("CHECK LOESCHEN")
+                    speichern = st.form_submit_button("ÄNDERUNGEN SPEICHERN")
 
                     if speichern:
                         if not neu_bewerter.strip():
@@ -879,29 +880,30 @@ def tab_historie(is_admin: bool = False) -> None:
                             except Exception as exc:
                                 st.error(f"Fehler beim Aktualisieren: {exc}")
 
-                    if loeschen:
-                        st.session_state[f"hist_del_confirm_{row.id}"] = True
-
-                # Bestaetigungs-Block (ausserhalb des Forms, damit der Rerun funktioniert)
-                if st.session_state.get(f"hist_del_confirm_{row.id}"):
+                # Löschen außerhalb des Forms (sonst schluckt das Form den Klick)
+                if not st.session_state.get(confirm_key):
+                    if st.button("CHECK LÖSCHEN", key=f"hist_del_btn_{row.id}"):
+                        st.session_state[confirm_key] = True
+                        st.rerun()
+                else:
                     st.warning(
-                        f"Diesen Check wirklich loeschen? "
-                        f"{row.gastgeber} &middot; {row.datum} &middot; {row.gesamt} Punkte"
+                        f"Diesen Check wirklich löschen? "
+                        f"{row.gastgeber} · {row.datum} · {row.gesamt} Punkte"
                     )
                     col_ok, col_cancel = st.columns(2)
                     with col_ok:
-                        if st.button("Ja, endgueltig loeschen", key=f"hist_del_ok_{row.id}"):
+                        if st.button("Ja, endgültig löschen", key=f"hist_del_ok_{row.id}"):
                             try:
                                 check_loeschen(int(row.id))
-                                st.session_state.pop(f"hist_del_confirm_{row.id}", None)
-                                st.success("Check geloescht.")
+                                st.session_state.pop(confirm_key, None)
+                                st.success("Check gelöscht.")
                                 st.rerun()
                             except Exception as exc:
-                                st.session_state.pop(f"hist_del_confirm_{row.id}", None)
-                                st.error(f"Fehler beim Loeschen: {exc}")
+                                st.session_state.pop(confirm_key, None)
+                                st.error(f"Fehler beim Löschen: {exc}")
                     with col_cancel:
                         if st.button("Abbrechen", key=f"hist_del_cancel_{row.id}"):
-                            st.session_state.pop(f"hist_del_confirm_{row.id}", None)
+                            st.session_state.pop(confirm_key, None)
                             st.rerun()
 
 
